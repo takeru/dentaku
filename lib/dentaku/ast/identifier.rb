@@ -3,6 +3,9 @@ require_relative '../exceptions'
 module Dentaku
   module AST
     class Identifier < Node
+      @@excel_mode = true
+      @@enable_value_cache = true
+
       attr_reader :identifier
 
       def initialize(token)
@@ -11,13 +14,21 @@ module Dentaku
 
       def value(context={})
         v = context.fetch(identifier) do
-          raise UnboundVariableError.new([identifier]),
-                "no value provided for variables: #{identifier}"
+          if @@excel_mode
+            ""
+          else
+            raise UnboundVariableError.new([identifier]),
+                  "no value provided for variables: #{identifier}"
+          end
         end
 
         case v
         when Node
-          v.value(context)
+          if @@enable_value_cache
+            context[identifier] = v.value(context)
+          else
+            v.value(context)
+          end
         else
           v
         end
