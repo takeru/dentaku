@@ -44,16 +44,23 @@ module Dentaku
       yield expression if block_given?
     end
 
-    def evaluate!(expression, data={})
+    def evaluate!(expression_or_expression_hash, data={})
+      unless expression_or_expression_hash.kind_of?(Hash)
+        return evaluate!({expression: expression_or_expression_hash}, data)[:expression]
+      end
+
+      expression_hash = expression_or_expression_hash
       store(data) do
-        node = expression
-        node = ast(node) unless node.is_a?(AST::Node)
-        unbound = node.dependencies - memory.keys
-        unless unbound.empty?
-          raise UnboundVariableError.new(unbound),
-                "no value provided for variables: #{unbound.join(', ')}"
+        expression_hash.each_with_object({}) do |(key, expression), result|
+          node = expression
+          node = ast(node) unless node.is_a?(AST::Node)
+          unbound = node.dependencies - memory.keys
+          unless unbound.empty?
+            raise UnboundVariableError.new(unbound),
+                  "no value provided for variables: #{unbound.join(', ')}"
+          end
+          result[key] = node.value(memory)
         end
-        node.value(memory)
       end
     end
 
