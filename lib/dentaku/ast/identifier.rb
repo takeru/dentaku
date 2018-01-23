@@ -7,6 +7,9 @@ module Dentaku
       include StringCasing
       attr_reader :identifier, :case_sensitive
 
+      @@excel_mode = true
+      @@cache_value = true
+
       def initialize(token, options = {})
         @case_sensitive = options.fetch(:case_sensitive, false)
         @identifier = standardize_case(token.value)
@@ -14,13 +17,21 @@ module Dentaku
 
       def value(context = {})
         v = context.fetch(identifier) do
-          raise UnboundVariableError.new([identifier]),
-                "no value provided for variables: #{identifier}"
+          if @@excel_mode
+            ""
+          else
+            raise UnboundVariableError.new([identifier]),
+                  "no value provided for variables: #{identifier}"
+          end
         end
 
         case v
         when Node
-          v.value(context)
+          if @@cache_value
+            context[identifier] = v.value(context)
+          else
+            v.value(context)
+          end
         else
           v
         end
