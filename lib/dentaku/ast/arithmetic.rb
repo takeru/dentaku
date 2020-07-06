@@ -47,6 +47,9 @@ module Dentaku
       end
 
       def numeric(val, prefer_integer)
+        if val == ""
+          return 0
+        end
         v = BigDecimal(val, Float::DIG + 1)
         v = v.to_i if prefer_integer && v.frac.zero?
         v
@@ -84,6 +87,9 @@ module Dentaku
       end
 
       def validate_format(string)
+        if string == ""
+          return
+        end
         unless string =~ /\A-?\d*(\.\d+)?\z/ && !string.empty?
           raise Dentaku::ArgumentError.for(:invalid_value, value: string, for: BigDecimal),
                 "String input '#{string}' is not coercible to numeric"
