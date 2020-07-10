@@ -14,8 +14,12 @@ module Dentaku
 
       def value(context = {})
         v = context.fetch(identifier) do
-          raise UnboundVariableError.new([identifier]),
-                "no value provided for variables: #{identifier}"
+          if Dentaku.excel_mode?
+            ""
+          else
+            raise UnboundVariableError.new([identifier]),
+                  "no value provided for variables: #{identifier}"
+          end
         end
 
         case v

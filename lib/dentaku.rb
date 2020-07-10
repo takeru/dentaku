@@ -5,6 +5,7 @@ require "dentaku/version"
 module Dentaku
   @enable_ast_caching = false
   @enable_dependency_order_caching = false
+  @enable_excel_mode = false
   @aliases = {}
 
   def self.evaluate(expression, data = {})
@@ -34,6 +35,18 @@ module Dentaku
 
   def self.cache_dependency_order?
     @enable_dependency_order_caching
+  end
+
+  def self.enable_excel_mode!
+    @enable_excel_mode = true
+  end
+
+  def self.disable_excel_mode!
+    @enable_excel_mode = false
+  end
+
+  def self.excel_mode?
+    @enable_excel_mode
   end
 
   def self.aliases

@@ -15,19 +15,46 @@ module Dentaku
         raise NotImplementedError
       end
 
+      def lr(context)
+        l = left.value(context)
+        r = right.value(context)
+        if Dentaku.excel_mode?
+          if l.class != r.class
+            if l.kind_of?(Integer) && r == ""
+              r = 0
+            elsif l == "" && r.kind_of?(Integer)
+              l = 0
+            end
+          end
+        end
+        [l, r]
+      end
+
       private
 
-      def value
+      def _value
         yield
       rescue ::ArgumentError => argument_error
         raise Dentaku::ArgumentError, argument_error.message
       rescue NoMethodError => no_method_error
         raise Dentaku::Error, no_method_error.message
       end
+
+      def value(&block)
+        _value(&block)
+      end
+
+      def excel_value(context)
+        _value(){
+          l, r = lr(context)
+          l.send(operator, r)
+        }
+      end
     end
 
     class LessThan < Comparator
       def value(context = {})
+        return excel_value(context) if Dentaku.excel_mode?
         super() { left.value(context) < right.value(context) }
       end
 
@@ -38,6 +65,7 @@ module Dentaku
 
     class LessThanOrEqual < Comparator
       def value(context = {})
+        return excel_value(context) if Dentaku.excel_mode?
         super() { left.value(context) <= right.value(context) }
       end
 
@@ -48,6 +76,7 @@ module Dentaku
 
     class GreaterThan < Comparator
       def value(context = {})
+        return excel_value(context) if Dentaku.excel_mode?
         super() { left.value(context) > right.value(context) }
       end
 
@@ -58,6 +87,7 @@ module Dentaku
 
     class GreaterThanOrEqual < Comparator
       def value(context = {})
+        return excel_value(context) if Dentaku.excel_mode?
         super() { left.value(context) >= right.value(context) }
       end
 
@@ -68,6 +98,7 @@ module Dentaku
 
     class NotEqual < Comparator
       def value(context = {})
+        return excel_value(context) if Dentaku.excel_mode?
         super() { left.value(context) != right.value(context) }
       end
 
@@ -78,6 +109,7 @@ module Dentaku
 
     class Equal < Comparator
       def value(context = {})
+        return excel_value(context) if Dentaku.excel_mode?
         super() { left.value(context) == right.value(context) }
       end
 

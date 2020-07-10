@@ -707,4 +707,18 @@ describe Dentaku::Calculator do
       end.to raise_error(Dentaku::UnboundVariableError)
     end
   end
+
+  describe 'excel mode' do
+    it 'should returned ""' do
+      calculator.store_formula("foo", "bar+1")
+      expect(calculator.evaluate("foo", bar: 2)).to eq(3)
+      expect(calculator.evaluate("foo")).to eq(nil)
+      begin
+        Dentaku.enable_excel_mode!
+        expect(calculator.evaluate("foo")).to eq(1)
+      ensure
+        Dentaku.disable_excel_mode!
+      end
+    end
+  end
 end
